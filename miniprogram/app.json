@@ -1,0 +1,22 @@
+{
+  "pages": ["pages/scan/scan", "pages/rules/rules", "pages/compare/compare"],
+  "window": {
+    "navigationBarTitleText": "食见 · 食品标签助手",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f7f6"
+  },
+  "tabBar": {
+    "color": "#73817b",
+    "selectedColor": "#137858",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/scan/scan", "text": "扫码展示" },
+      { "pagePath": "pages/rules/rules", "text": "规则判别" },
+      { "pagePath": "pages/compare/compare", "text": "食品对比" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

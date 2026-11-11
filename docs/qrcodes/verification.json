@@ -1,0 +1,20 @@
+[
+  {
+    "decoded_utf8_bytes" : 147,
+    "decoder" : "Apple Core Image CIDetectorTypeQRCode",
+    "file" : "peanut-crisp.png",
+    "matches_json_exactly" : true
+  },
+  {
+    "decoded_utf8_bytes" : 129,
+    "decoder" : "Apple Core Image CIDetectorTypeQRCode",
+    "file" : "plain-yogurt.png",
+    "matches_json_exactly" : true
+  },
+  {
+    "decoded_utf8_bytes" : 122,
+    "decoder" : "Apple Core Image CIDetectorTypeQRCode",
+    "file" : "chicken-breast.png",
+    "matches_json_exactly" : true
+  }
+]

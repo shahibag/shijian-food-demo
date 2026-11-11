@@ -1,0 +1,9 @@
+.card { margin-top: 20rpx; padding: 22rpx; }
+.choice-label { margin-top: 12rpx; }
+.choices .choice { padding-top: 10rpx; padding-bottom: 10rpx; }
+.profile-note { margin-top: 12rpx; }
+.actions { margin-top: 20rpx; }
+.compact-food { margin-top: 14rpx; }
+.result { margin-top: 18rpx; padding: 20rpx; }
+.alert { margin-top: 12rpx; padding-top: 12rpx; }
+.footer { margin-top: 16rpx; }

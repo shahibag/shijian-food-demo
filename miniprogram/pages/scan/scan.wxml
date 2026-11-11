@@ -1,0 +1,26 @@
+<import src="../../templates/shared.wxml" />
+<view class="page">
+  <view class="heading">看懂一份食品标签</view>
+  <view class="subtitle">扫一扫测试二维码，查看营养与过敏原。</view>
+  <view class="actions">
+    <button class="primary" bindtap="scan">扫一扫食品标签</button>
+    <button class="secondary" bindtap="toggleInput">粘贴 JSON</button>
+  </view>
+  <template is="jsonInput" data="{{showInput, jsonText, inputError}}" />
+  <view class="section">
+    <view class="muted">也可以先体验预置样例</view>
+    <view class="sample-row">
+      <button class="sample" wx:for="{{samples}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseSample">{{item.name}}</button>
+    </view>
+  </view>
+  <view class="card" wx:if="{{food}}">
+    <view class="row"><text class="muted">食品营养档案</text><text class="source">{{source}}</text></view>
+    <view class="food-name">{{food.name}}</view>
+    <view class="muted">每 100 克 · 钠为 mg，其余营养素为 g</view>
+    <template is="nutrients" data="{{nutrients: food.nutrients}}" />
+    <view class="allergens"><text>过敏原</text><text class="allergen-value">{{allergenText}}</text></view>
+  </view>
+  <template is="legend" />
+  <view class="muted small section">钠、糖、脂肪越低颜色越绿；蛋白质相反。</view>
+  <template is="footer" />
+</view>

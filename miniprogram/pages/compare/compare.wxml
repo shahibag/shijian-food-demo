@@ -1,0 +1,31 @@
+<import src="../../templates/shared.wxml" />
+<view class="page">
+  <view class="heading">放在一起，更清楚</view>
+  <view class="subtitle">3 款预置食品 · 统一按每 100 克对比</view>
+  <view class="compare-table">
+    <view class="compare-row compare-head">
+      <view class="row-label">营养素</view>
+      <view class="compare-cell" wx:for="{{foods}}" wx:key="id">{{item.name}}</view>
+    </view>
+    <view class="compare-row" wx:for="{{rows}}" wx:key="key">
+      <view class="row-label">{{item.label}}<text class="table-unit">{{item.unit}} / 100g</text></view>
+      <view class="compare-cell" wx:for="{{item.cells}}" wx:for-item="cell" wx:key="id">
+        <view class="cell-grade {{cell.level}}"><view class="cell-number">{{cell.value}}</view><view class="cell-level">{{cell.levelText}}</view></view>
+      </view>
+    </view>
+    <view class="compare-row allergens-row">
+      <view class="row-label">过敏原</view>
+      <view class="compare-cell allergen-cell" wx:for="{{foods}}" wx:key="id">{{item.allergenText}}</view>
+    </view>
+  </view>
+  <template is="legend" />
+  <view class="card threshold-card">
+    <view class="card-title">颜色怎么看？</view>
+    <view class="threshold-line"><text>钠</text><text>≤120 绿 / ≥600 红（mg）</text></view>
+    <view class="threshold-line"><text>糖</text><text>≤5 绿 / ≥15 红（g）</text></view>
+    <view class="threshold-line"><text>脂肪</text><text>≤3 绿 / ≥20 红（g）</text></view>
+    <view class="threshold-line"><text>蛋白质</text><text>≥12 绿 / 小于6 红（g）</text></view>
+    <view class="muted small" style="margin-top:12rpx">其余为橙色；所有阈值均按每 100 克计算。</view>
+  </view>
+  <template is="footer" />
+</view>

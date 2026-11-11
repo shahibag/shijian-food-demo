@@ -1,0 +1,31 @@
+<template name="footer">
+  <view class="footer">
+    <text class="footer-line">部分阈值参考 GB 28050，颜色分级为原型自定义</text>
+    <text class="footer-line">仅作消费参考 · 数据均为竞赛演示样例</text>
+  </view>
+</template>
+<template name="nutrients">
+  <view class="nutrient-list">
+    <view class="nutrient" wx:for="{{nutrients}}" wx:key="key">
+      <text class="nutrient-name">{{item.label}}</text>
+      <view class="nutrient-value">{{item.value}}<text class="unit">{{item.unit}}</text></view>
+      <text class="grade {{item.level}}">{{item.levelText}}</text>
+    </view>
+  </view>
+</template>
+<template name="legend">
+  <view class="legend">
+    <view class="legend-item"><view class="dot green"></view>绿：较优</view>
+    <view class="legend-item"><view class="dot orange"></view>橙：关注</view>
+    <view class="legend-item"><view class="dot red"></view>红：留意</view>
+  </view>
+</template>
+<template name="jsonInput">
+  <view class="card" wx:if="{{showInput}}">
+    <view class="card-title">粘贴测试标签 JSON</view>
+    <view class="muted">与扫码使用同一套解析和判断逻辑</view>
+    <textarea class="input-box" value="{{jsonText}}" bindinput="onJsonInput" maxlength="4096" placeholder="粘贴 docs/qrcodes 内的 JSON 内容" />
+    <view class="input-error" wx:if="{{inputError}}">{{inputError}}</view>
+    <button class="secondary" bindtap="submitJson">解析标签</button>
+  </view>
+</template>

@@ -1,0 +1,54 @@
+<import src="../../templates/shared.wxml" />
+<view class="page">
+  <view class="heading">这份食品，适合我吗？</view>
+  <view class="subtitle">选好个人关注项，再扫码查看规则提示。</view>
+  <view class="card">
+    <view class="card-title">我的关注项</view>
+    <view class="choice-label">过敏原 · 可多选</view>
+    <view class="choices">
+      <button class="choice {{item.selected ? 'selected' : ''}}" wx:for="{{allergenOptions}}" wx:key="value" data-group="allergens" data-value="{{item.value}}" bindtap="toggleChoice"><text class="choice-check">{{item.selected ? '☑' : '□'}}</text>{{item.value}}</button>
+    </view>
+    <view class="choice-label">慢性病 · 可多选</view>
+    <view class="choices condition-choices">
+      <button class="choice {{item.selected ? 'selected' : ''}}" wx:for="{{conditionOptions}}" wx:key="value" data-group="conditions" data-value="{{item.value}}" bindtap="toggleChoice"><text class="choice-check">{{item.selected ? '☑' : '□'}}</text>{{item.value}}</button>
+    </view>
+    <view class="profile-note">关注项仅保存在本机，可随时取消勾选。</view>
+  </view>
+  <view class="actions">
+    <button class="primary" bindtap="scan">扫码并判断</button>
+    <button class="secondary" bindtap="toggleInput">粘贴 JSON</button>
+  </view>
+  <template is="jsonInput" data="{{showInput, jsonText, inputError}}" />
+  <view class="sample-row">
+    <button class="sample" wx:for="{{samples}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseSample">{{item.name}}</button>
+  </view>
+  <view class="compact-food" wx:if="{{food}}">当前食品：<text style="font-weight:600">{{food.name}}</text><text class="muted"> · {{source}}</text></view>
+  <view class="result {{result.level}}" wx:if="{{result}}">
+    <view class="result-title">{{result.title}}</view>
+    <view class="result-summary">{{result.summary}}</view>
+    <view class="alert" wx:for="{{result.alerts}}" wx:key="title">
+      <view class="alert-title">{{item.title}}</view>
+      <view class="alert-detail">{{item.detail}}</view>
+    </view>
+    <view class="disclaimer">{{result.disclaimer}}</view>
+  </view>
+  <view class="card" wx:else>
+    <view class="card-title">等待食品标签</view>
+    <view class="muted">勾选关注项后扫码，或点击上方样例。</view>
+  </view>
+  <template is="footer" />
+</view>
+<view class="modal-mask" wx:if="{{showWarning}}">
+  <view class="modal">
+    <view class="modal-heading" style="{{result.level === 'orange' ? 'color:#965300' : ''}}">{{result.title}}</view>
+    <view class="modal-subtitle">{{food.name}} · 每 100 克</view>
+    <scroll-view class="modal-alerts" scroll-y="{{true}}">
+      <view class="modal-alert {{item.level}}" wx:for="{{result.alerts}}" wx:key="title">
+        <view class="alert-title">{{item.title}}</view>
+        <view class="alert-detail">{{item.detail}}</view>
+      </view>
+    </scroll-view>
+    <view class="muted">纯规则匹配 · {{result.disclaimer}}</view>
+    <button class="primary" bindtap="closeWarning">我知道了，查看详情</button>
+  </view>
+</view>

@@ -1,0 +1,1 @@
+{ "desc": "仅本地演示", "rules": [{ "action": "disallow", "page": "*" }] }

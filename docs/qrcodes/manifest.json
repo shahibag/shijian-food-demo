@@ -1,0 +1,32 @@
+[
+  {
+    "id": "peanut-crisp",
+    "name": "花生牛奶酥",
+    "utf8_bytes": 147,
+    "modules": 49,
+    "pixels_per_module": 8,
+    "quiet_zone_modules": 4,
+    "encoding": "UTF-8 with ECI 26",
+    "error_correction": "M"
+  },
+  {
+    "id": "plain-yogurt",
+    "name": "原味酸奶",
+    "utf8_bytes": 129,
+    "modules": 49,
+    "pixels_per_module": 8,
+    "quiet_zone_modules": 4,
+    "encoding": "UTF-8 with ECI 26",
+    "error_correction": "M"
+  },
+  {
+    "id": "chicken-breast",
+    "name": "即食鸡胸肉",
+    "utf8_bytes": 122,
+    "modules": 49,
+    "pixels_per_module": 8,
+    "quiet_zone_modules": 4,
+    "encoding": "UTF-8 with ECI 26",
+    "error_correction": "M"
+  }
+]
