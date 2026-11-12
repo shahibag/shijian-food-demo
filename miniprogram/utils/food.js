@@ -66,9 +66,7 @@ function validateFood(input) {
   }
   const storage = requireText(input.shelfLife.storage, '贮存条件', 80);
   const productionDate = requireText(input.productionDate, '生产日期', 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(productionDate)) {
-    throw new Error('生产日期格式应为 YYYY-MM-DD。');
-  }
+  assertCalendarDate(productionDate, '生产日期');
   if (input.note !== undefined && typeof input.note !== 'string') {
     throw new Error('note 必须是文字。');
   }
@@ -94,6 +92,18 @@ function validateFood(input) {
     productionDate: productionDate,
     note: typeof input.note === 'string' ? input.note : ''
   };
+}
+
+function assertCalendarDate(iso, label) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) throw new Error(label + '格式应为 YYYY-MM-DD。');
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    throw new Error(label + '不是有效的日历日期。');
+  }
 }
 
 function lookupCatalog(text) {
@@ -122,4 +132,9 @@ function parseFood(raw) {
   return validateFood(input);
 }
 
-module.exports = { parseFood: parseFood, validateFood: validateFood, MAX_QR_LENGTH: MAX_QR_LENGTH };
+module.exports = {
+  parseFood: parseFood,
+  validateFood: validateFood,
+  assertCalendarDate: assertCalendarDate,
+  MAX_QR_LENGTH: MAX_QR_LENGTH
+};

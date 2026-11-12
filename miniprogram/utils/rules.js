@@ -1,6 +1,6 @@
 const { validateFood } = require('./food');
 const { CLAIMS } = require('./nutrition');
-const { MISSING_ALLERGEN_NOTICE, inferFromIngredients, inferenceText } = require('./allergens');
+const { MISSING_ALLERGEN_NOTICE, concernsForDeclared, inferFromIngredients, inferenceText } = require('./allergens');
 
 const ALLERGEN_OPTIONS = ['花生', '牛奶', '麸质', '小麦', '大豆', '鸡蛋', '坚果', '鱼', '甲壳类'];
 const CONDITION_OPTIONS = ['糖尿病', '高血压'];
@@ -41,13 +41,21 @@ function evaluateFood(input, profile) {
     }
     alerts.push({ level: 'mid', title: '录入缺漏', detail: MISSING_ALLERGEN_NOTICE });
   } else {
-    const matches = food.allergens.filter(function (item) { return allergens.indexOf(item) !== -1; });
-    if (matches.length) {
+    const hits = [];
+    food.allergens.forEach(function (name) {
+      const selected = concernsForDeclared(name).filter(function (concern) {
+        return allergens.indexOf(concern) !== -1;
+      });
+      if (!selected.length) return;
+      const exact = selected.length === 1 && selected[0] === name;
+      hits.push(exact ? name : name + '（对应' + selected.join('、') + '）');
+    });
+    if (hits.length) {
       declared = true;
       alerts.push({
         level: 'red',
         title: '过敏原预警',
-        detail: '标签致敏原含有您勾选的项目：' + matches.join('、') + '。请避免食用。'
+        detail: '标签致敏原含有与您勾选相关的项目：' + hits.join('、') + '。请避免食用。'
       });
     }
   }

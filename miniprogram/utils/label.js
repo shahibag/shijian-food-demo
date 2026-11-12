@@ -1,11 +1,12 @@
 const { describeFood } = require('./nutrition');
+const { assertCalendarDate } = require('./food');
 const { MISSING_ALLERGEN_NOTICE, inferFromIngredients, inferenceText } = require('./allergens');
 
 function addDays(iso, days) {
+  assertCalendarDate(iso, '生产日期');
+  if (!Number.isInteger(days)) throw new Error('无法计算有效期。');
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!match || !Number.isInteger(days)) throw new Error('无法计算有效期。');
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
-  if (Number.isNaN(date.getTime())) throw new Error('无法计算有效期。');
   date.setUTCDate(date.getUTCDate() + days);
   const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const day = String(date.getUTCDate()).padStart(2, '0');

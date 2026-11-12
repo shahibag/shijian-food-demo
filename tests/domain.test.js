@@ -103,6 +103,16 @@ test('invalid payloads and incomplete labels fail visibly', () => {
   assert.throws(function () { validateFood(badSugar); }, Error);
 });
 
+test('production dates must be real calendar days before an expiry is calculated', () => {
+  const food = byId('DEMO-0001');
+  for (const productionDate of ['2026-99-99', '2026-02-31', '2026-02-29', '2026-04-31', '2026-00-10']) {
+    assert.throws(function () { validateFood(Object.assign({}, food, { productionDate: productionDate })); }, /日历日期/);
+    assert.throws(function () { addDays(productionDate, food.shelfLife.days); }, /日历日期/);
+  }
+  assert.equal(validateFood(Object.assign({}, food, { productionDate: '2024-02-29' })).productionDate, '2024-02-29');
+  assert.equal(addDays('2024-02-29', 1), '2024-03-01');
+});
+
 test('DEMO-0014 is valid even though the allergen field is missing', () => {
   const oats = parseFood(JSON.stringify(byId('DEMO-0014')));
   assert.equal(oats.allergenFieldMissing, true);
@@ -158,6 +168,19 @@ test('peanut samples warn only for the four foods that declare peanut', () => {
   const clean = evaluateFood(byId('DEMO-0007'), profile);
   assert.deepEqual(byId('DEMO-0007').allergens, ['花生']);
   assert.equal(clean.alerts.length, 1);
+});
+
+test('a saved gluten choice still warns when the label declares wheat', () => {
+  const profile = { allergens: ['麸质'], conditions: [] };
+  for (const id of ['DEMO-0001', 'DEMO-0002', 'DEMO-0003', 'DEMO-0004', 'DEMO-0005', 'DEMO-0006', 'DEMO-0011']) {
+    const result = evaluateFood(byId(id), profile);
+    assert.equal(result.title, '过敏原预警', id);
+    assert.match(result.alerts[0].detail, /小麦/);
+    assert.match(result.alerts[0].detail, /麸质/);
+  }
+  assert.equal(evaluateFood(byId('DEMO-0001'), { allergens: ['花生'], conditions: [] }).title, '无警示');
+  assert.equal(evaluateFood(byId('DEMO-0012'), profile).title, '无警示');
+  assert.equal(presentLabel(byId('DEMO-0001'), '扫码结果').allergenText, '小麦');
 });
 
 test('DEMO-0014 does not alert from the empty allergen field and shows the exact gap sentence', () => {

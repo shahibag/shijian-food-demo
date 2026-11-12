@@ -13,6 +13,11 @@ const INGREDIENT_HINTS = [
   { keyword: '鸡蛋', allergen: '鸡蛋' }
 ];
 
+function concernsForDeclared(name) {
+  if (name === '小麦') return ['小麦', '麸质'];
+  return [name];
+}
+
 function inferFromIngredients(ingredients) {
   const text = typeof ingredients === 'string' ? ingredients : '';
   const found = [];
@@ -32,6 +37,7 @@ function inferenceText(hints) {
 
 module.exports = {
   MISSING_ALLERGEN_NOTICE: MISSING_ALLERGEN_NOTICE,
+  concernsForDeclared: concernsForDeclared,
   inferFromIngredients: inferFromIngredients,
   inferenceText: inferenceText
 };
