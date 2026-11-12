@@ -2,13 +2,13 @@
 
 竞赛用微信原生小程序原型。扫一张预置 JSON 测试码，或点选 15 条虚构样例，**第一屏是完整标签信息**。营养色阶用同一色相的浅橙、中橙、深橙，不使用红黄绿。过敏原和慢性病勾选只写在手机本地。
 
-不需要云开发、后端、登录、AI 或域名。数据在 `miniprogram/data/products.json`。
+不需要云开发、后端、登录、AI 或域名。数据在 `miniprogram/data/products.js`。
 
 | 完整标签（预览） | 橙色深浅（预览） | 花生预警（预览） | 致敏原缺漏（预览） |
 | --- | --- | --- | --- |
 | ![完整标签](docs/screenshots/05-label-preview.png) | ![食品对比](docs/screenshots/06-compare-preview.png) | ![规则判别](docs/screenshots/07-allergen-preview.png) | ![原味燕麦片](docs/screenshots/08-missing-label-preview.png) |
 
-上表四张是浏览器对同一套 WXML 的预览截图，画面顶部写有「本地预览 · 非微信开发者工具截图」。本次改动没有在微信开发者工具里重拍。`docs/screenshots/01-scan.png` 至 `04-compare.png` 是上一版三款样例、红橙绿配色的开发者工具截图，不能当作当前界面。
+上表四张是浏览器对同一套 WXML 的预览截图，画面顶部写有「本地预览 · 非微信开发者工具截图」。`docs/screenshots/01-scan.png` 至 `04-compare.png` 是上一版三款样例、红橙绿配色的开发者工具截图。
 
 ## 在微信开发者工具中运行
 
@@ -16,6 +16,8 @@
 2. 选择**包含 `project.config.json` 的项目根目录**，不要只选 `miniprogram`。
 3. 项目类型选「小程序」。换账号时用「测试号」，并选择「不使用云服务」。
 4. 点击「编译」。底部有「扫码展示」「规则判别」「食品对比」。**不需要构建 npm。**
+
+在手机微信中预览、邀请体验成员或发源码给同学的步骤见[操作与演示指南](docs/GUIDE.md#7-在手机微信中查看以及分享给别人)。
 
 ## 怎么演示
 
@@ -32,7 +34,7 @@
 
 ## 样例数据
 
-`miniprogram/data/products.json` 有 DEMO-0001 至 DEMO-0015，品牌是示例品牌A–O。营养成分一律按每 100 克或每 100 毫升，对比页不换算成每份。
+`miniprogram/data/products.js` 有 DEMO-0001 至 DEMO-0015，品牌是示例品牌A–O。营养成分一律按每 100 克或每 100 毫升，对比页不换算成每份。
 
 | 用途 | 编号 |
 | --- | --- |
@@ -77,7 +79,7 @@
 
 ```text
 project.config.json
-miniprogram/data/products.json   15 条虚构商品
+miniprogram/data/products.js   15 条虚构商品
 miniprogram/pages/scan/          扫码入口
 miniprogram/pages/label/         完整标签信息（扫码后的第一屏）
 miniprogram/pages/rules/         本机关注项和 if-else

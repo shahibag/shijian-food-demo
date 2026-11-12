@@ -1,4 +1,6 @@
-[
+// Shared catalog for the native mini program, QR generator and tests.
+// WeChat's native module loader supports JavaScript modules, not JSON require.
+module.exports = [
   {
     "id": "DEMO-0001",
     "gtin": "6941234500017",
@@ -254,4 +256,4 @@
     "productionDate": "2026-11-06",
     "note": "高血压边界。钠 780 mg/100g，预期谨慎少量。"
   }
-]
+];

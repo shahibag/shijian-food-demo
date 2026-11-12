@@ -1,5 +1,5 @@
-// Local fictional catalog. products.json is the only sample-data source.
-const PRODUCTS = require('./products.json');
+// Local fictional catalog. products.js is the only sample-data source.
+const PRODUCTS = require('./products');
 
 const BISCUIT_IDS = ['DEMO-0001', 'DEMO-0002', 'DEMO-0003', 'DEMO-0004'];
 

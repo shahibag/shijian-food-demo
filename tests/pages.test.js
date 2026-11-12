@@ -33,11 +33,7 @@ function loadPage(name, storageValue) {
   });
   function evaluate(filename) {
     if (modules.has(filename)) return modules.get(filename).exports;
-    if (filename.endsWith('.json')) {
-      const value = JSON.parse(fs.readFileSync(filename, 'utf8'));
-      modules.set(filename, { exports: value });
-      return value;
-    }
+    assert.equal(path.extname(filename), '.js', 'Native WeChat require only loads JavaScript modules: ' + filename);
     const module = { exports: {} };
     modules.set(filename, module);
     const localRequire = createRequire(filename);
