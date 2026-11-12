@@ -1,13 +1,16 @@
-.compare-table { background: #fff; border: 1rpx solid #e1e9e5; border-radius: 20rpx; overflow: hidden; margin-top: 26rpx; }
-.compare-row { display: flex; align-items: stretch; border-bottom: 1rpx solid #edf1ee; padding: 14rpx 10rpx; }
+.conclusion-card { padding-top: 22rpx; padding-bottom: 22rpx; }
+.conclusion-text { margin-top: 10rpx; font-size: 30rpx; line-height: 1.55; }
+.name-list { margin-top: 16rpx; color: #6d6258; font-size: 24rpx; line-height: 1.6; }
+.compare-table { background: #fff; border: 1rpx solid #eadfd4; border-radius: 20rpx; overflow: hidden; margin-top: 18rpx; }
+.compare-row { display: flex; align-items: stretch; border-bottom: 1rpx solid #f3ebe4; padding: 12rpx 6rpx; }
 .compare-row:last-child { border-bottom: 0; }
-.row-label { width: 116rpx; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding-left: 10rpx; font-size: 25rpx; }
-.compare-cell { flex: 1; min-width: 0; padding: 2rpx 6rpx; text-align: center; display: flex; align-items: center; justify-content: center; }
-.compare-head { background: #edf5f0; padding-top: 22rpx; padding-bottom: 22rpx; font-size: 25rpx; font-weight: 600; }
-.table-unit { font-size: 19rpx; color: #7c8b82; margin-top: 2rpx; }
-.cell-grade { width: 100%; border-radius: 12rpx; padding: 10rpx 3rpx; }
-.cell-number { font-size: 33rpx; font-weight: 650; line-height: 1.25; }
-.cell-level { font-size: 21rpx; margin-top: 3rpx; }
-.allergen-cell { font-size: 21rpx; color: #846453; }
+.row-label { width: 108rpx; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding-left: 8rpx; font-size: 22rpx; }
+.compare-cell { flex: 1; min-width: 0; padding: 2rpx 4rpx; text-align: center; display: flex; align-items: center; justify-content: center; }
+.compare-head { background: #fff4ec; padding-top: 18rpx; padding-bottom: 18rpx; font-size: 22rpx; font-weight: 600; }
+.table-unit { font-size: 18rpx; color: #8a7464; margin-top: 2rpx; }
+.cell-grade { width: 100%; border-radius: 12rpx; padding: 8rpx 2rpx; }
+.cell-number { font-size: 26rpx; font-weight: 650; line-height: 1.25; }
+.cell-level { font-size: 20rpx; margin-top: 2rpx; }
+.allergen-cell { font-size: 20rpx; color: #846453; line-height: 1.35; }
 .threshold-card { padding-top: 22rpx; padding-bottom: 22rpx; }
-.threshold-line { display: flex; justify-content: space-between; font-size: 24rpx; margin-top: 9rpx; color: #586f61; }
+.threshold-line { display: flex; justify-content: space-between; gap: 12rpx; font-size: 24rpx; margin-top: 9rpx; color: #6a5346; }

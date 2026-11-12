@@ -1,31 +1,42 @@
 <import src="../../templates/shared.wxml" />
 <view class="page">
-  <view class="heading">放在一起，更清楚</view>
-  <view class="subtitle">3 款预置食品 · 统一按每 100 克对比</view>
+  <view class="heading">四款饼干放在一起</view>
+  <view class="subtitle">DEMO-0001 至 DEMO-0004 · 每 100 克 · 不做份量换算</view>
+  <view class="card conclusion-card">
+    <view class="card-title">对比结论</view>
+    <view class="conclusion-text">{{conclusion}}</view>
+  </view>
+  <view class="name-list">
+    <view wx:for="{{foods}}" wx:key="id">{{item.shortName}}：{{item.name}}</view>
+  </view>
   <view class="compare-table">
     <view class="compare-row compare-head">
       <view class="row-label">营养素</view>
-      <view class="compare-cell" wx:for="{{foods}}" wx:key="id">{{item.name}}</view>
+      <view class="compare-cell" wx:for="{{foods}}" wx:key="id">{{item.shortName}}</view>
     </view>
     <view class="compare-row" wx:for="{{rows}}" wx:key="key">
-      <view class="row-label">{{item.label}}<text class="table-unit">{{item.unit}} / 100g</text></view>
+      <view class="row-label">{{item.label}}<text class="table-unit">{{item.unit}}</text></view>
       <view class="compare-cell" wx:for="{{item.cells}}" wx:for-item="cell" wx:key="id">
-        <view class="cell-grade {{cell.level}}"><view class="cell-number">{{cell.value}}</view><view class="cell-level">{{cell.levelText}}</view></view>
+        <view class="cell-grade {{cell.depthClass}}">
+          <view class="cell-number">{{cell.value}}</view>
+          <view class="cell-level" wx:if="{{cell.graded}}">{{cell.depthText}}</view>
+        </view>
       </view>
     </view>
     <view class="compare-row allergens-row">
-      <view class="row-label">过敏原</view>
+      <view class="row-label">致敏原</view>
       <view class="compare-cell allergen-cell" wx:for="{{foods}}" wx:key="id">{{item.allergenText}}</view>
     </view>
   </view>
   <template is="legend" />
   <view class="card threshold-card">
-    <view class="card-title">颜色怎么看？</view>
-    <view class="threshold-line"><text>钠</text><text>≤120 绿 / ≥600 红（mg）</text></view>
-    <view class="threshold-line"><text>糖</text><text>≤5 绿 / ≥15 红（g）</text></view>
-    <view class="threshold-line"><text>脂肪</text><text>≤3 绿 / ≥20 红（g）</text></view>
-    <view class="threshold-line"><text>蛋白质</text><text>≥12 绿 / 小于6 红（g）</text></view>
-    <view class="muted small" style="margin-top:12rpx">其余为橙色；所有阈值均按每 100 克计算。</view>
+    <view class="card-title">橙色深浅怎么看？</view>
+    <view class="threshold-line"><text>钠</text><text>≤120 浅橙 / ≥800 深橙（mg）</text></view>
+    <view class="threshold-line"><text>糖</text><text>≤5 浅橙 / ≥15 深橙（g）</text></view>
+    <view class="threshold-line"><text>脂肪</text><text>≤3 浅橙 / ≥20 深橙（g）</text></view>
+    <view class="threshold-line"><text>蛋白质</text><text>≥12 浅橙 / 小于 6 深橙（g）</text></view>
+    <view class="muted small">介于两端之间为中橙。高钠、低钠、高糖、低糖、高脂、高蛋白依据 GB 28050-2025 含量声称条件。脂肪 ≤3 g、蛋白质小于 6 g 用来补齐三档。</view>
+    <view class="scale-note">仅供参考，不构成食品优劣评价</view>
   </view>
   <template is="footer" />
 </view>

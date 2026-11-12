@@ -1,20 +1,92 @@
 [
   {
-    "decoded_utf8_bytes" : 147,
-    "decoder" : "Apple Core Image CIDetectorTypeQRCode",
-    "file" : "peanut-crisp.png",
-    "matches_json_exactly" : true
+    "file": "DEMO-0001.png",
+    "decoded_utf8_bytes": 616,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
   },
   {
-    "decoded_utf8_bytes" : 129,
-    "decoder" : "Apple Core Image CIDetectorTypeQRCode",
-    "file" : "plain-yogurt.png",
-    "matches_json_exactly" : true
+    "file": "DEMO-0002.png",
+    "decoded_utf8_bytes": 643,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
   },
   {
-    "decoded_utf8_bytes" : 122,
-    "decoder" : "Apple Core Image CIDetectorTypeQRCode",
-    "file" : "chicken-breast.png",
-    "matches_json_exactly" : true
+    "file": "DEMO-0003.png",
+    "decoded_utf8_bytes": 661,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0004.png",
+    "decoded_utf8_bytes": 616,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0005.png",
+    "decoded_utf8_bytes": 638,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0006.png",
+    "decoded_utf8_bytes": 616,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0007.png",
+    "decoded_utf8_bytes": 590,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0008.png",
+    "decoded_utf8_bytes": 510,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0009.png",
+    "decoded_utf8_bytes": 563,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0010.png",
+    "decoded_utf8_bytes": 582,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0011.png",
+    "decoded_utf8_bytes": 620,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0012.png",
+    "decoded_utf8_bytes": 559,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0013.png",
+    "decoded_utf8_bytes": 595,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0014.png",
+    "decoded_utf8_bytes": 537,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
+  },
+  {
+    "file": "DEMO-0015.png",
+    "decoded_utf8_bytes": 558,
+    "decoder": "zbarimg 0.23.93",
+    "matches_json_exactly": true
   }
 ]

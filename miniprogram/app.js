@@ -1,1 +1,1 @@
-App({ globalData: { currentFood: null, source: '' } });
+App({ globalData: { currentFood: null, source: '', pendingWarning: false } });

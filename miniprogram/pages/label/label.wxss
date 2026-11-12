@@ -1,0 +1,6 @@
+.section-button { margin-top: 16rpx; width: 100%; }
+.label-field { padding: 16rpx 0; border-top: 1rpx solid #edf1ee; }
+.label-key { color: #6d5c50; font-size: 24rpx; }
+.label-val { margin-top: 4rpx; font-size: 30rpx; }
+.inferred { margin-top: 8rpx; color: #9a5416; font-size: 26rpx; }
+.barcode { margin-top: 8rpx; }
