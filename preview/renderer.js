@@ -32,9 +32,14 @@
   }
   function loadModule(file, from = '') {
     let target = resolve(file, from);
-    if (!/\.js$/.test(target)) target += '.js';
+    if (!/\.(js|json)$/.test(target)) target += (target + '.json') in files ? '.json' : '.js';
     if (cache[target]) return cache[target].exports;
     if (!(target in files)) throw new Error(`Missing source module: ${target}`);
+    if (target.endsWith('.json')) {
+      const value = JSON.parse(files[target]);
+      cache[target] = { exports: value };
+      return value;
+    }
     const module = { exports: {} };
     cache[target] = module;
     new Function('require', 'module', 'exports', 'Page', 'App', 'getApp', 'wx', `${files[target]}\n//# sourceURL=native/${target}`)(
@@ -111,9 +116,11 @@
     }
   }
   function interpolate(value, scope) {
-    const exact = value.match(/^\s*{{([\s\S]*?)}}\s*$/);
-    if (exact) return evaluate(exact[1], scope);
-    return value.replace(/{{([\s\S]*?)}}/g, (_, expression) => {
+    const parts = String(value).match(/{{[\s\S]*?}}/g) || [];
+    // A lone mustache keeps its raw value so wx:if can see false/0. Mixed text
+    // must not swallow every pair up to the last closing braces.
+    if (parts.length === 1 && String(value).trim() === parts[0]) return evaluate(parts[0].slice(2, -2), scope);
+    return String(value).replace(/{{([\s\S]*?)}}/g, (_, expression) => {
       const result = evaluate(expression, scope);
       return result === undefined || result === null ? '' : String(result);
     });
@@ -271,6 +278,10 @@
       button.append(document.createTextNode(tab.text));
       button.addEventListener('click', () => switchPage(tab.pagePath)); tabs.append(button);
     });
+    const onTab = ((config.tabBar || {}).list || []).some(tab => tab.pagePath === path);
+    tabs.hidden = !onTab;
+    tabs.style.display = onTab ? 'flex' : 'none';
+    document.getElementById('mini-page').style.paddingBottom = onTab ? '78px' : '12px';
     history.replaceState(null, '', `/#${path}`);
     window.scrollTo(0, 0);
     document.title = `${pageConfig.navigationBarTitleText || '食见'} · 小程序源码本地预览`;

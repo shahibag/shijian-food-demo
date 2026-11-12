@@ -1,108 +1,273 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { parseFood, validateFood, MAX_QR_LENGTH } = require('../miniprogram/utils/food');
-const { classifyNutrient, describeFood } = require('../miniprogram/utils/nutrition');
-const { evaluateFood } = require('../miniprogram/utils/rules');
-const { FOODS, getFoodById } = require('../miniprogram/data/foods');
+const { CLAIMS, classifyNutrient, describeFood } = require('../miniprogram/utils/nutrition');
+const { evaluateFood, DISCLAIMER, SUGAR_AVOID, SODIUM_CAUTION_FROM } = require('../miniprogram/utils/rules');
+const { MISSING_ALLERGEN_NOTICE } = require('../miniprogram/utils/allergens');
+const { addDays, presentLabel } = require('../miniprogram/utils/label');
+const { biscuitConclusion } = require('../miniprogram/utils/conclusion');
+const { PRODUCTS, getFoodById, biscuitFoods, BISCUIT_IDS } = require('../miniprogram/data/foods');
 
-function foodWith(overrides) { return Object.assign({}, FOODS[0], overrides); }
+const NOTICE = '致敏原信息可能存在缺漏，请以实体包装标示为准';
+const CONCLUSION = '这 4 款饼干中，全麦高纤苏打饼干的钠含量最低（320mg/100g），海盐芝士苏打饼干的钠与糖均最高。';
 
-test('all sample JSON payloads parse into canonical foods', () => {
-  for (const food of FOODS) assert.deepEqual(parseFood(JSON.stringify(food)), food);
-});
+function byId(id) { return getFoodById(id); }
+function withNutrition(id, nutrition) {
+  const food = byId(id);
+  food.nutrition = Object.assign({}, food.nutrition, nutrition);
+  return food;
+}
 
-test('invalid JSON, URLs, arrays, null, empty and excessive input fail visibly', () => {
-  for (const raw of ['', '  ', '{', 'https://example.com', 'null', '[]', '42', undefined, ' '.repeat(MAX_QR_LENGTH + 1) + '{}']) {
-    assert.throws(() => parseFood(raw), Error);
-  }
-});
-
-test('required name, nutrition basis and allergen declaration cannot silently disappear', () => {
-  for (const key of ['name', 'basis', 'allergens', 'sodium', 'sugar', 'fat', 'protein']) {
-    const food = foodWith();
-    delete food[key];
-    assert.throws(() => parseFood(JSON.stringify(food)), Error, key);
-  }
-  for (const overrides of [{ name: ' ' }, { basis: '100ml' }, { allergens: '花生' }, { allergens: [''] }, { allergens: [null] }, { id: 123 }]) {
-    assert.throws(() => validateFood(foodWith(overrides)), Error);
-  }
-});
-
-test('nutrients require actual nonnegative finite numbers', () => {
-  for (const key of ['sodium', 'sugar', 'fat', 'protein']) {
-    for (const value of [-1, NaN, Infinity, -Infinity, '12', null, true]) {
-      assert.throws(() => validateFood(foodWith({ [key]: value })), Error);
+test('catalog keeps the 15 demo ids, fictional brands and required label text', () => {
+  assert.equal(PRODUCTS.length, 15);
+  const brands = [];
+  PRODUCTS.forEach(function (food, index) {
+    assert.equal(food.id, 'DEMO-' + String(index + 1).padStart(4, '0'));
+    assert.equal(food.brand, '示例品牌' + 'ABCDEFGHIJKLMNO'[index]);
+    assert.equal(food.gtin, food.barcode);
+    assert.match(food.gtin, /^\d{13}$/);
+    assert.equal(food.gtin.startsWith('69'), true);
+    brands.push(food.brand);
+    for (const value of [food.name, food.ingredients, food.spec, food.shelfLife.storage, food.productionDate]) {
+      assert.equal(typeof value, 'string');
+      assert.ok(value.trim());
     }
+    assert.equal(Number.isInteger(food.shelfLife.days), true);
+    assert.equal(presentLabel(food).note, undefined);
+  });
+  assert.equal(new Set(brands).size, 15);
+  assert.equal(byId('DEMO-0001').gtin, '6941234500017');
+});
+
+test('comparison biscuits keep the spec numbers and the exact conclusion', () => {
+  const expected = {
+    'DEMO-0001': [1985, 8.2, 19.6, 66.3, 680, 6.5],
+    'DEMO-0002': [1830, 9.8, 15.2, 62.1, 320, 3.1],
+    'DEMO-0003': [2150, 7.5, 24.8, 64.2, 890, 11.4],
+    'DEMO-0004': [1905, 8.6, 18.1, 65.8, 510, 8.9]
+  };
+  const foods = biscuitFoods();
+  assert.deepEqual(foods.map(function (food) { return food.id; }), BISCUIT_IDS);
+  foods.forEach(function (food) {
+    assert.equal(food.category, '饼干');
+    assert.equal(food.basis, '100g');
+    assert.deepEqual([
+      food.nutrition.energy_kj, food.nutrition.protein_g, food.nutrition.fat_g,
+      food.nutrition.carbohydrate_g, food.nutrition.sodium_mg, food.nutrition.sugar_g
+    ], expected[food.id]);
+  });
+  assert.equal(biscuitConclusion(foods), CONCLUSION);
+  assert.equal(PRODUCTS.filter(function (food) { return food.category === '饼干'; }).some(function (food) { return food.id === 'DEMO-0005'; }), true);
+});
+
+test('chronic and allergen samples keep the spec nutrition and DEMO-0014', () => {
+  assert.equal(byId('DEMO-0009').nutrition.sugar_g, 4.2);
+  assert.equal(byId('DEMO-0013').nutrition.sugar_g, 13.6);
+  assert.equal(byId('DEMO-0013').basis, '100mL');
+  assert.equal(byId('DEMO-0011').nutrition.sodium_mg, 4800);
+  assert.equal(byId('DEMO-0011').basis, '100mL');
+  assert.equal(byId('DEMO-0011').category, '调味品');
+  assert.equal(byId('DEMO-0015').nutrition.sodium_mg, 780);
+  const oats = byId('DEMO-0014');
+  assert.equal(oats.allergenFieldMissing, true);
+  assert.deepEqual(oats.allergens, []);
+  assert.equal(oats.ingredients.includes('燕麦片'), true);
+  assert.equal(byId('DEMO-0010').allergens.length, 0);
+  assert.equal(byId('DEMO-0010').allergenFieldMissing, false);
+});
+
+test('full JSON, sample ids and barcodes parse into the same catalog record', () => {
+  for (const food of PRODUCTS) {
+    assert.deepEqual(parseFood(JSON.stringify(food)), food);
+    assert.deepEqual(parseFood(food.id), food);
+    assert.deepEqual(parseFood(food.barcode), food);
   }
-  assert.equal(parseFood(JSON.stringify(foodWith({ sugar: 0 }))).sugar, 0);
 });
 
-test('normalization trims names and deduplicates allergens without mutating input', () => {
-  const input = foodWith({ name: '  花生酥  ', allergens: [' 花生 ', '花生', '牛奶'] });
-  const normalized = validateFood(input);
-  assert.equal(normalized.name, '花生酥');
-  assert.deepEqual(normalized.allergens, ['花生', '牛奶']);
-  assert.equal(input.allergens[0], ' 花生 ');
+test('invalid payloads and incomplete labels fail visibly', () => {
+  for (const raw of ['', '  ', '{', 'https://example.com', 'null', '[]', '42', undefined, ' '.repeat(MAX_QR_LENGTH + 1) + '{}', 'DEMO-9999']) {
+    assert.throws(function () { parseFood(raw); }, Error);
+  }
+  const food = byId('DEMO-0001');
+  for (const key of ['name', 'ingredients', 'spec', 'nutrition', 'shelfLife', 'productionDate', 'basis']) {
+    const broken = JSON.parse(JSON.stringify(food));
+    delete broken[key];
+    assert.throws(function () { validateFood(broken); }, Error);
+  }
+  assert.throws(function () { validateFood(Object.assign({}, food, { basis: 'serving' })); }, Error);
+  assert.throws(function () { validateFood(Object.assign({}, food, { allergens: '花生' })); }, Error);
+  const badSugar = JSON.parse(JSON.stringify(food));
+  badSugar.nutrition.sugar_g = '13.6';
+  assert.throws(function () { validateFood(badSugar); }, Error);
 });
 
-test('lower-is-better thresholds are inclusive green and inclusive red', () => {
-  for (const [key, low, high] of [['sodium', 120, 600], ['sugar', 5, 15], ['fat', 3, 20]]) {
-    assert.equal(classifyNutrient(key, 0).level, 'green');
-    assert.equal(classifyNutrient(key, low).level, 'green');
-    assert.equal(classifyNutrient(key, low + 0.01).level, 'orange');
-    assert.equal(classifyNutrient(key, high - 0.01).level, 'orange');
-    assert.equal(classifyNutrient(key, high).level, 'red');
-    assert.equal(classifyNutrient(key, high + 1).level, 'red');
+test('production dates must be real calendar days before an expiry is calculated', () => {
+  const food = byId('DEMO-0001');
+  for (const productionDate of ['2026-99-99', '2026-02-31', '2026-02-29', '2026-04-31', '2026-00-10']) {
+    assert.throws(function () { validateFood(Object.assign({}, food, { productionDate: productionDate })); }, /日历日期/);
+    assert.throws(function () { addDays(productionDate, food.shelfLife.days); }, /日历日期/);
+  }
+  assert.equal(validateFood(Object.assign({}, food, { productionDate: '2024-02-29' })).productionDate, '2024-02-29');
+  assert.equal(addDays('2024-02-29', 1), '2024-03-01');
+});
+
+test('DEMO-0014 is valid even though the allergen field is missing', () => {
+  const oats = parseFood(JSON.stringify(byId('DEMO-0014')));
+  assert.equal(oats.allergenFieldMissing, true);
+  assert.deepEqual(oats.allergens, []);
+});
+
+test('orange bands use the GB 28050-2025 claim lines and stay three levels', () => {
+  assert.equal(CLAIMS.sodiumHigh, 800);
+  assert.equal(CLAIMS.sodiumLow, 120);
+  assert.equal(CLAIMS.sugarHigh, 15);
+  assert.equal(CLAIMS.sugarLow, 5);
+  assert.equal(CLAIMS.fatHigh, 20);
+  assert.equal(CLAIMS.proteinHigh, 12);
+  for (const [key, low, high] of [['sodium_mg', 120, 800], ['sugar_g', 5, 15], ['fat_g', 3, 20]]) {
+    assert.equal(classifyNutrient(key, 0).level, 'light');
+    assert.equal(classifyNutrient(key, low).level, 'light');
+    assert.equal(classifyNutrient(key, low + 0.01).level, 'mid');
+    assert.equal(classifyNutrient(key, high - 0.01).level, 'mid');
+    assert.equal(classifyNutrient(key, high).level, 'deep');
+  }
+  for (const [value, level] of [[0, 'deep'], [5.99, 'deep'], [6, 'mid'], [11.99, 'mid'], [12, 'light'], [23, 'light']]) {
+    assert.equal(classifyNutrient('protein_g', value).level, level);
+  }
+  assert.equal(classifyNutrient('sugar_g', 13.6).level, 'mid');
+  assert.equal(classifyNutrient('sodium_mg', 780).level, 'mid');
+  assert.deepEqual(
+    ['light', 'mid', 'deep'].map(function (level) { return classifyNutrient('sodium_mg', level === 'light' ? 120 : level === 'mid' ? 320 : 890).depthText; }),
+    ['浅橙', '中橙', '深橙']
+  );
+});
+
+test('description keeps every nutrition row and does not grade energy or carbohydrate', () => {
+  const described = describeFood(byId('DEMO-0002'));
+  assert.equal(described.nutrients.length, 6);
+  const sugar = described.nutrients.find(function (item) { return item.key === 'sugar_g'; });
+  assert.equal(sugar.level, 'light');
+  assert.equal(sugar.levelText, '低糖');
+  assert.equal(sugar.depthText, '浅橙');
+  assert.equal(described.nutrients.find(function (item) { return item.key === 'energy_kj'; }).graded, false);
+});
+
+test('peanut samples warn only for the four foods that declare peanut', () => {
+  const profile = { allergens: ['花生'], conditions: [] };
+  for (const id of ['DEMO-0005', 'DEMO-0006', 'DEMO-0007', 'DEMO-0012']) {
+    const result = evaluateFood(byId(id), profile);
+    assert.equal(result.title, '过敏原预警', id);
+    assert.match(result.alerts[0].detail, /花生/);
+  }
+  for (const id of ['DEMO-0008', 'DEMO-0009', 'DEMO-0010', 'DEMO-0013']) {
+    const result = evaluateFood(byId(id), profile);
+    assert.equal(result.alerts.some(function (alert) { return alert.title === '过敏原预警'; }), false, id);
+  }
+  const clean = evaluateFood(byId('DEMO-0007'), profile);
+  assert.deepEqual(byId('DEMO-0007').allergens, ['花生']);
+  assert.equal(clean.alerts.length, 1);
+});
+
+test('a saved gluten choice still warns when the label declares wheat', () => {
+  const profile = { allergens: ['麸质'], conditions: [] };
+  for (const id of ['DEMO-0001', 'DEMO-0002', 'DEMO-0003', 'DEMO-0004', 'DEMO-0005', 'DEMO-0006', 'DEMO-0011']) {
+    const result = evaluateFood(byId(id), profile);
+    assert.equal(result.title, '过敏原预警', id);
+    assert.match(result.alerts[0].detail, /小麦/);
+    assert.match(result.alerts[0].detail, /麸质/);
+  }
+  assert.equal(evaluateFood(byId('DEMO-0001'), { allergens: ['花生'], conditions: [] }).title, '无警示');
+  assert.equal(evaluateFood(byId('DEMO-0012'), profile).title, '无警示');
+  assert.equal(presentLabel(byId('DEMO-0001'), '扫码结果').allergenText, '小麦');
+});
+
+test('DEMO-0014 does not alert from the empty allergen field and shows the exact gap sentence', () => {
+  const oats = byId('DEMO-0014');
+  const result = evaluateFood(oats, { allergens: ['花生', '麸质'], conditions: [] });
+  assert.deepEqual(oats.allergens, []);
+  assert.equal(result.missingNotice, NOTICE);
+  assert.equal(MISSING_ALLERGEN_NOTICE, NOTICE);
+  assert.equal(result.alerts.some(function (alert) { return alert.title === '过敏原预警'; }), false);
+  assert.equal(result.alerts.some(function (alert) { return alert.detail === NOTICE; }), true);
+  const hint = result.alerts.find(function (alert) { return alert.title === '配料表解析'; });
+  assert.match(hint.detail, /燕麦/);
+  assert.match(hint.detail, /麸质/);
+  assert.equal(result.title, '致敏原字段未录入');
+});
+
+test('chronic rules keep the five sample outcomes without converting a serving', () => {
+  assert.equal(evaluateFood(byId('DEMO-0013'), { allergens: [], conditions: ['糖尿病'] }).title, '不建议食用');
+  assert.match(evaluateFood(byId('DEMO-0013'), { allergens: [], conditions: ['糖尿病'] }).alerts[0].detail, /13\.6 g\/100mL/);
+  assert.equal(evaluateFood(byId('DEMO-0009'), { allergens: [], conditions: ['糖尿病'] }).title, '推荐食用');
+  assert.match(evaluateFood(byId('DEMO-0009'), { allergens: [], conditions: ['糖尿病'] }).alerts[0].detail, /4\.2/);
+  const sauce = evaluateFood(byId('DEMO-0011'), { allergens: [], conditions: ['高血压'] });
+  assert.equal(sauce.title, '不建议食用');
+  assert.match(sauce.alerts[0].detail, /4800 mg\/100mL/);
+  assert.match(sauce.alerts[0].detail, /按每份食用量计/);
+  assert.doesNotMatch(sauce.alerts[0].detail, /每份约为/);
+  const boundary = evaluateFood(byId('DEMO-0015'), { allergens: [], conditions: ['高血压'] });
+  assert.equal(boundary.title, '谨慎少量');
+  assert.match(boundary.alerts[0].detail, /780/);
+  const quiet = evaluateFood(byId('DEMO-0010'), { allergens: ['花生'], conditions: ['糖尿病', '高血压'] });
+  assert.equal(quiet.title, '无警示');
+  assert.equal(quiet.alerts.length, 0);
+  assert.match(quiet.summary, /不代表/);
+});
+
+test('diabetes and hypertension bands stay explicit around the claim thresholds', () => {
+  assert.equal(SUGAR_AVOID, 12);
+  assert.equal(SODIUM_CAUTION_FROM, 750);
+  const diabetes = { allergens: [], conditions: ['糖尿病'] };
+  assert.equal(evaluateFood(withNutrition('DEMO-0010', { sugar_g: 5 }), diabetes).title, '推荐食用');
+  assert.equal(evaluateFood(withNutrition('DEMO-0010', { sugar_g: 11.9 }), diabetes).title, '无警示');
+  assert.match(evaluateFood(withNutrition('DEMO-0010', { sugar_g: 12 }), diabetes).alerts[0].detail, /尚未达到高糖声称/);
+  assert.match(evaluateFood(withNutrition('DEMO-0010', { sugar_g: 15 }), diabetes).alerts[0].detail, /达到高糖声称条件/);
+  const pressure = { allergens: [], conditions: ['高血压'] };
+  assert.equal(evaluateFood(withNutrition('DEMO-0010', { sodium_mg: 749 }), pressure).alerts.length, 0);
+  assert.equal(evaluateFood(withNutrition('DEMO-0010', { sodium_mg: 750 }), pressure).title, '谨慎少量');
+  assert.equal(evaluateFood(withNutrition('DEMO-0010', { sodium_mg: 800 }), pressure).title, '不建议食用');
+  assert.doesNotMatch(evaluateFood(withNutrition('DEMO-0003', {}), pressure).alerts[0].detail, /按每份食用量计/);
+  assert.equal(evaluateFood(byId('DEMO-0001'), {}).title, '尚未选择关注项');
+  assert.equal(DISCLAIMER, '仅供参考，不构成食品优劣评价');
+});
+
+test('label presenter fills every complete-label field and computes the expiry date', () => {
+  assert.equal(addDays('2026-11-08', 7), '2026-11-15');
+  assert.equal(addDays('2026-01-31', 1), '2026-02-01');
+  for (const food of PRODUCTS) {
+    const label = presentLabel(food, '扫码结果');
+    for (const value of [label.name, label.ingredients, label.netContent, label.productionDate, label.shelfLifeText, label.expiryDate, label.storage, label.allergenText, label.basisText]) {
+      assert.equal(typeof value, 'string');
+      assert.ok(value.trim(), food.id);
+    }
+    assert.equal(label.nutrients.length, 6);
+    assert.equal(label.expiryDate, addDays(food.productionDate, food.shelfLife.days));
+  }
+  const milk = presentLabel(byId('DEMO-0008'), '扫码结果');
+  assert.equal(milk.basisText, '每 100 毫升');
+  assert.match(milk.basisNote, /不做份量换算/);
+  assert.equal(milk.nutrients.find(function (item) { return item.key === 'sodium_mg'; }).value, 45);
+  const oats = presentLabel(byId('DEMO-0014'), '扫码结果');
+  assert.equal(oats.missingNotice, NOTICE);
+  assert.match(oats.inferredText, /燕麦/);
+  assert.match(oats.inferredText, /麸质/);
+  const sauce = presentLabel(byId('DEMO-0011'), '扫码结果');
+  assert.equal(sauce.nutrients.find(function (item) { return item.key === 'sodium_mg'; }).value, 4800);
+});
+
+test('shipped QR JSON matches the catalog records', () => {
+  for (const food of PRODUCTS) {
+    const file = path.join(__dirname, '../docs/qrcodes', food.id + '.json');
+    assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), food);
   }
 });
 
-test('protein coloring is reversed with exact 6 and 12 boundaries', () => {
-  for (const [value, level] of [[0, 'red'], [5.99, 'red'], [6, 'orange'], [11.99, 'orange'], [12, 'green'], [23, 'green']]) {
-    assert.equal(classifyNutrient('protein', value).level, level);
-  }
-});
-
-test('description includes readable units, labels and colors', () => {
-  const described = describeFood(FOODS[0]);
-  assert.equal(described.name, FOODS[0].name);
-  assert.equal(described.nutrients.length, 4);
-  assert.deepEqual(described.nutrients[0], { key: 'sodium', label: '钠', value: 320, unit: 'mg', level: 'orange', levelText: '中等' });
-});
-
-test('allergen matches cause red warning and all concurrent rules remain visible', () => {
-  const result = evaluateFood(foodWith({ sodium: 600 }), { allergens: ['花生', '牛奶'], conditions: ['糖尿病', '高血压'] });
-  assert.equal(result.level, 'red');
-  assert.equal(result.alerts.length, 3);
-  assert.match(result.alerts[0].detail, /花生、牛奶/);
-  assert.equal(result.disclaimer, '仅作消费参考');
-});
-
-test('diabetes rule uses strict >15, independent of red nutrition at 15', () => {
-  const profile = { allergens: [], conditions: ['糖尿病'] };
-  assert.equal(classifyNutrient('sugar', 15).level, 'red');
-  assert.equal(evaluateFood(foodWith({ sugar: 15 }), profile).alerts.length, 0);
-  assert.equal(evaluateFood(foodWith({ sugar: 15.01 }), profile).level, 'orange');
-});
-
-test('hypertension demo rule starts at sodium 600', () => {
-  const profile = { allergens: [], conditions: ['高血压'] };
-  assert.equal(evaluateFood(foodWith({ sodium: 599.99 }), profile).alerts.length, 0);
-  assert.equal(evaluateFood(foodWith({ sodium: 600 }), profile).level, 'orange');
-});
-
-test('unselected rules do not trigger; no-match never claims food is safe', () => {
-  const empty = evaluateFood(FOODS[0], {});
-  assert.equal(empty.level, 'neutral');
-  assert.equal(empty.alerts.length, 0);
-  const noMatch = evaluateFood(FOODS[2], { allergens: ['花生'], conditions: ['糖尿病'] });
-  assert.equal(noMatch.alerts.length, 0);
-  assert.equal(noMatch.title, '未触发已选规则');
-  assert.match(noMatch.summary, /不代表/);
-});
-
-test('sample lookup returns an isolated copy and missing IDs return null', () => {
-  const copy = getFoodById('peanut-crisp');
+test('sample lookup returns an isolated copy', () => {
+  const copy = byId('DEMO-0007');
   copy.allergens.push('鸡蛋');
-  assert.equal(FOODS[0].allergens.includes('鸡蛋'), false);
+  copy.nutrition.sodium_mg = 1;
+  assert.deepEqual(PRODUCTS.find(function (item) { return item.id === 'DEMO-0007'; }).allergens, ['花生']);
   assert.equal(getFoodById('missing'), null);
 });

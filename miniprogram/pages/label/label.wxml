@@ -1,0 +1,71 @@
+<import src="../../templates/shared.wxml" />
+<view class="page">
+  <view class="heading">完整标签信息</view>
+  <view class="subtitle">扫码后的第一屏。下列项目都会显示。</view>
+  <view class="actions">
+    <button class="primary" bindtap="scan">重新扫码</button>
+    <button class="secondary" bindtap="toggleInput">粘贴 JSON</button>
+  </view>
+  <template is="jsonInput" data="{{showInput, jsonText, inputError}}" />
+  <view class="missing-note" wx:if="{{label.missingNotice}}">{{label.missingNotice}}</view>
+  <view class="card label-sheet" wx:if="{{label}}">
+    <view class="row">
+      <text class="muted">{{label.brand}} · {{label.category}}</text>
+      <text class="source">{{label.source}}</text>
+    </view>
+    <view class="label-field">
+      <view class="label-key">名称</view>
+      <view class="label-val food-name">{{label.name}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">配料表</view>
+      <view class="label-val">{{label.ingredients}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">净含量</view>
+      <view class="label-val">{{label.netContent}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">生产日期</view>
+      <view class="label-val">{{label.productionDate}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">保质期</view>
+      <view class="label-val">{{label.shelfLifeText}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">有效期</view>
+      <view class="label-val">{{label.expiryDate}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">贮存条件</view>
+      <view class="label-val">{{label.storage}}</view>
+    </view>
+    <view class="label-field">
+      <view class="label-key">营养成分表</view>
+      <view class="muted">{{label.basisText}} · {{label.basisNote}}</view>
+      <template is="nutrients" data="{{nutrients: label.nutrients}}" />
+      <template is="legend" />
+    </view>
+    <view class="label-field">
+      <view class="label-key">致敏原</view>
+      <view class="label-val allergen-value">{{label.allergenText}}</view>
+      <view class="inferred" wx:if="{{label.inferredText}}">{{label.inferredText}}</view>
+      <view class="missing-note" wx:if="{{label.missingNotice}}">{{label.missingNotice}}</view>
+    </view>
+    <view class="muted barcode">商品条码 {{label.barcode}}</view>
+  </view>
+  <view class="card" wx:else>
+    <view class="card-title">还没有标签</view>
+    <view class="muted">请先扫码，或展开下方样例。</view>
+  </view>
+  <view class="actions">
+    <button class="primary" bindtap="openRules">查看规则判别</button>
+    <button class="secondary" bindtap="openCompare">食品对比</button>
+  </view>
+  <button class="secondary section-button" bindtap="toggleSamples">{{showSamples ? '收起样例' : '更换样例'}}</button>
+  <view wx:if="{{showSamples}}">
+    <template is="samples" data="{{samples: samples}}" />
+  </view>
+  <template is="footer" />
+</view>

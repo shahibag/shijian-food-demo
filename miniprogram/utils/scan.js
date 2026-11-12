@@ -1,5 +1,7 @@
 const { parseFood } = require('./food');
 
+const LABEL_PAGE = '/pages/label/label';
+
 function scanFood(onSuccess) {
   wx.scanCode({
     onlyFromCamera: false,
@@ -19,8 +21,14 @@ function scanFood(onSuccess) {
 }
 
 function rememberFood(food, source) {
-  getApp().globalData.currentFood = food;
-  getApp().globalData.source = source;
+  const app = getApp();
+  app.globalData.currentFood = food;
+  app.globalData.source = source;
+  app.globalData.pendingWarning = true;
 }
 
-module.exports = { scanFood, rememberFood };
+function openFoodLabel() {
+  wx.navigateTo({ url: LABEL_PAGE });
+}
+
+module.exports = { scanFood: scanFood, rememberFood: rememberFood, openFoodLabel: openFoodLabel, LABEL_PAGE: LABEL_PAGE };

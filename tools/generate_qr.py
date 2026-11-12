@@ -48,6 +48,8 @@ def make_qr(payload):
 
 def font(size):
     candidates = [
+        "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+        "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
         "/System/Library/Fonts/STHeiti Medium.ttc",
         "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
@@ -60,20 +62,28 @@ def font(size):
 
 
 def contact_sheet(foods, images):
-    sheet = Image.new("RGB", (1920, 1020), "#f4f7f6")
+    columns = 5
+    rows = (len(foods) + columns - 1) // columns
+    cell_w, cell_h = 360, 470
+    sheet = Image.new("RGB", (40 + columns * cell_w, 180 + rows * cell_h), "#f7f4f1")
     draw = ImageDraw.Draw(sheet)
-    draw.text((64, 46), "食见 · JSON 测试二维码", font=font(48), fill="#182f2a")
-    draw.text((64, 115), "用于微信开发者工具 / wx.scanCode；模拟食品，每 100 克；仅作消费参考", font=font(27), fill="#52655f")
+    draw.text((32, 28), "食见 · JSON 测试二维码", font=font(40), fill="#2c241e")
+    draw.text((32, 84), "模拟食品 · 每 100 克或 100 毫升 · 仅供参考，不构成食品优劣评价", font=font(22), fill="#6d5c50")
+    thumb = 250
     for index, (food, code) in enumerate(zip(foods, images)):
-        x = 40 + index * 630
-        draw.rounded_rectangle((x, 190, x + 610, 940), radius=20, fill="white", outline="#dbe4e0", width=2)
-        draw.text((x + 30, 216), food["name"], font=font(36), fill="#182f2a")
-        draw.text((x + 30, 268), food["id"], font=font(22), fill="#52655f")
-        sheet.paste(code, (x + (610 - code.width) // 2, 312))
-        line_y = 312 + max(image.height for image in images) + 18
-        draw.text((x + 30, line_y), f'糖 {food["sugar"]} g  /  钠 {food["sodium"]} mg', font=font(26), fill="#182f2a")
-        draw.text((x + 30, line_y + 44), "过敏原：" + ("、".join(food["allergens"]) or "标签未标示"), font=font(24), fill="#52655f")
-    draw.text((64, 968), "扫描单张 PNG 更方便；若模拟器不支持选图，可复制同名 JSON 到扫码结果输入框。", font=font(25), fill="#52655f")
+        col, row = index % columns, index // columns
+        x, y = 24 + col * cell_w, 140 + row * cell_h
+        draw.rounded_rectangle((x, y, x + cell_w - 24, y + cell_h - 24), radius=16, fill="white", outline="#eadfd4", width=2)
+        draw.text((x + 16, y + 14), food["name"], font=font(22), fill="#2c241e")
+        draw.text((x + 16, y + 44), food["id"], font=font(16), fill="#6d5c50")
+        resized = code.resize((thumb, thumb), Image.Resampling.NEAREST)
+        sheet.paste(resized, (x + (cell_w - 24 - thumb) // 2, y + 74))
+        sodium = food["nutrition"]["sodium_mg"]
+        sugar = food["nutrition"]["sugar_g"]
+        unit = "100mL" if food.get("basis") == "100mL" else "100g"
+        draw.text((x + 16, y + 336), f"钠 {sodium} mg / 糖 {sugar} g · 每{unit}", font=font(16), fill="#2c241e")
+        allergens = "、".join(food["allergens"]) or ("字段未录入" if food.get("allergenFieldMissing") else "标签未列出")
+        draw.text((x + 16, y + 364), "致敏原：" + allergens, font=font(16), fill="#6d5c50")
     sheet.save(OUTPUT / "test-labels.png")
 
 
@@ -85,7 +95,7 @@ def main():
         parser.error("未找到 Node.js，请使用 --node 指定路径。")
     source = ROOT / "miniprogram" / "data" / "foods.js"
     result = subprocess.run(
-        [args.node, "-e", "process.stdout.write(JSON.stringify(require(process.argv[1]).FOODS))", str(source)],
+        [args.node, "-e", "process.stdout.write(JSON.stringify(require(process.argv[1]).PRODUCTS))", str(source)],
         check=True, capture_output=True, text=True, encoding="utf-8",
     )
     foods = json.loads(result.stdout)

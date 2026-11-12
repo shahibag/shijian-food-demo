@@ -1,10 +1,10 @@
 {
-  "pages": ["pages/scan/scan", "pages/rules/rules", "pages/compare/compare"],
+  "pages": ["pages/scan/scan", "pages/label/label", "pages/rules/rules", "pages/compare/compare"],
   "window": {
     "navigationBarTitleText": "食见 · 食品标签助手",
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f4f7f6"
+    "backgroundColor": "#f7f4f1"
   },
   "tabBar": {
     "color": "#73817b",

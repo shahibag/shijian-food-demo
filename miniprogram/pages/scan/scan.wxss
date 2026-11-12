@@ -1,1 +1,1 @@
-/* Shared styles are in app.wxss. */
+.section-button { margin-top: 16rpx; }
